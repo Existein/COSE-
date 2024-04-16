@@ -1,0 +1,38 @@
+def find_nested_elements(list):
+    connected_components = []
+
+    for start_element in list:
+        if start_element not in connected_components:
+            current_group = set()
+            dfs(start_element, current_group, connected_components)
+
+    return connected_components
+
+
+def dfs(current_element, current_group, connected_components):
+    if current_element in current_group:
+        return
+
+    current_group.add(current_element)
+
+    for next_element in list[current_element]:
+        if next_element not in connected_components:
+            dfs(next_element, current_group.copy(), connected_components)
+        else:
+            for group in connected_components:
+                if next_element in group:
+                    current_group.update(group)
+                    connected_components.remove(group)
+                    break
+
+
+# Example usage
+lists = {
+    "a": {"b", "c", "d", "e"},
+    "b": {"a", "c", "g", "z"},
+    "c": {"a", "b", "h", "u"},
+    "d": {"a", "z"}
+}
+
+connected_components = find_nested_elements(lists)
+print(connected_components)
