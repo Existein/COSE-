@@ -25,7 +25,7 @@ def benchmark_configuration(memory_mi, vcpus):
     for _ in range(3):  # 3 warm-up runs
         requests.get(BASE_URL)  # Discard results
     
-    time.sleep(5)
+    time.sleep(10)
 
     for _ in range(10):  # 10 main runs
         start_time = time.time()
@@ -53,17 +53,20 @@ def update_function_config(memory_mi, vcpus):
         print(f"Update complete: Memory (MiB): {memory_mi}, vCPUs: {vcpus}")
 
     # A short wait might be beneficial to let deployment complete
-    time.sleep(5)  
+    time.sleep(10)  
+
+def get_cost(memory, vcpu, exec_time):
+    return 0.0000004 + (0.0000025 * (memory / 1024.0) * exec_time) + (0.0000100 * (vcpu * 2.4) * exec_time)
 
 if __name__ == "__main__":
-    with open('benchmark_results.csv', 'w', newline='') as csvfile:
+    with open('io_benchmark_results.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['Memory (MiB)', 'vCPUs', 'Avg. Execution Time'])  # Header row
+        writer.writerow(['Memory (MiB)', 'vCPUs', 'Avg. Execution Time', 'Cost ($)'])  # Header row
 
-        # random.shuffle(CONFIGURATIONS)  # Randomize order
         for mem, vcpu in CONFIGURATIONS:
             update_function_config(mem, vcpu)
             avg_time = benchmark_configuration(mem, vcpu)
-            writer.writerow([mem, vcpu, avg_time])  # Write results for each configuration
+            cost = get_cost(mem, vcpu, avg_time)
+            writer.writerow([mem, vcpu, avg_time, cost])  # Write results for each configuration
             writer.writerow('')
-            print(f"Memory: {mem}MiB, vCPUs: {vcpu}, Avg. Time: {avg_time}")
+            print(f"Memory: {mem}MiB, vCPUs: {vcpu}, Avg. Time: {avg_time}, Cost: {cost}")
